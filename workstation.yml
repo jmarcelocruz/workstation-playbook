@@ -1,0 +1,77 @@
+- name: Configure workstation type machines
+  hosts: workstation
+  tasks:
+  - name: Enable multiarch support
+    become: true
+    ansible.builtin.command: dpkg --add-architecture i386
+  - name: Update apt cache
+    become: true
+    ansible.builtin.apt:
+      update_cache: true
+  - name: Uninstall games
+    become: true
+    ansible.builtin.apt:
+      name: gnome-games
+      autoremove: true
+      state: absent
+  - name: Install Flatpak support
+    become: true
+    ansible.builtin.apt:
+      name:
+      - flatpak
+      - gnome-software-plugin-flatpak
+  - name: Add Flathub remote
+    become: true
+    community.general.flatpak_remote:
+      name: flathub
+      flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  - name: Remove Firefox ESR
+    become: true
+    ansible.builtin.apt:
+      name: firefox-esr
+      state: absent
+  - name: Install Firefox from Flathub
+    become: true
+    community.general.flatpak:
+      name: org.mozilla.firefox
+  - name: Add Spotify key
+    become: true
+    ansible.builtin.apt_key:
+      url: https://download.spotify.com/debian/pubkey_7A3A762FAFD4A51F.gpg
+      keyring: /etc/apt/trusted.gpg.d/spotify.gpg
+  - name: Add Spotify repository
+    become: true
+    ansible.builtin.apt_repository:
+      repo: deb http://repository.spotify.com stable non-free
+      filename: spotify
+  - name: Install Spotify
+    become: true
+    ansible.builtin.apt:
+      name: spotify-client
+  - name: Add Visual Studio Code key
+    become: true
+    ansible.builtin.apt_key:
+      url: https://packages.microsoft.com/keys/microsoft.asc
+      keyring: /etc/apt/keyrings/packages.microsoft.gpg
+  - name: Add Visual Studio Code repository
+    become: true
+    ansible.builtin.apt_repository:
+      repo: deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main
+      filename: vscode
+  - name: Install Visual Studio Code
+    become: true
+    ansible.builtin.apt:
+      name: code
+  - name: Install git
+    become: true
+    ansible.builtin.apt:
+      name: git
+  - name: Install Steam
+    become: true
+    ansible.builtin.apt:
+      name:
+      - steam-installer
+      - mesa-vulkan-drivers
+      - libglx-mesa0:i386
+      - mesa-vulkan-drivers:i386
+      - libgl1-mesa-dri:i386
