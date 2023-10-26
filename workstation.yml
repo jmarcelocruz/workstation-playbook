@@ -75,3 +75,48 @@
       - libglx-mesa0:i386
       - mesa-vulkan-drivers:i386
       - libgl1-mesa-dri:i386
+  - name: Install Gnome Boxes
+    become: true
+    ansible.builtin.apt:
+      name:
+      - gnome-boxes
+      - libvirt-clients
+      - libvirt-daemon-system
+  - name: Add user to `libvirt` group
+    become: true
+    ansible.builtin.user:
+      name: '{{ ansible_facts["user_id"] }}'
+      groups: libvirt
+      append: true
+  - name: Start & Enable `libvirtd` daemon
+    become: true
+    ansible.builtin.service:
+      name: libvirtd
+      enabled: true
+      state: started
+  - name: Install required python3 modules
+    become: true
+    ansible.builtin.apt:
+      name:
+      - python3-libvirt
+      - python3-lxml
+  - name: Start and set autostart on virbr0
+    become: true
+    community.libvirt.virt_net:
+      name: default
+      command: start
+      autostart: true
+  - name: Configure qemu bridge
+    become: true
+    ansible.builtin.lineinfile:
+      path: /etc/qemu/bridge.conf
+      line: "allow virbr0"
+      create: true
+      owner: root
+      group: libvirt
+      mode: 0640
+  - name: Set setuid bit for `qemu-bridge-helper`
+    become: true
+    ansible.builtin.file:
+      path: /usr/lib/qemu/qemu-bridge-helper
+      mode: u+s

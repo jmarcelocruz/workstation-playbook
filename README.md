@@ -16,3 +16,4 @@ It was developed and tested against a fresh install of Debian 12 (Bookworm).
 - Spotify
 - Steam
 - Firefox (latest version from Flathub)
+- Gnome Boxes (with bridged network setup)
